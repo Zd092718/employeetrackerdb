@@ -31,18 +31,18 @@ class Department{
             if(err) {
                 console.error(err)
             } else {
-                console.log(result);
+                console.log(this.showDep());
             }
         })
     }
 }
 
 class Role extends Department{
-    constructor(id, title, salary, department_id){
-        super(id)
+    constructor(title, salary, dep_name){
+        super(dep_name)
         this.title = title;
         this.salary = salary;
-        this.department_id = department_id;
+        // this.dep_name = this.dep_name;
     };
     showRole(data){
         db.query(`SELECT title as Title, salary as Salary, dep_name as Department FROM emp_role INNER JOIN department ON emp_role.department_id = department.id`, (err, result) => {
@@ -53,12 +53,12 @@ class Role extends Department{
             }
     })
     };
-    addRole(data){
-        db.query(`INSERT INTO emp_role VALUES (?)`, (err, result) => {
+    addRole(data1, data2, data3){
+        db.query(`INSERT INTO emp_role ?`, (data1, data2, data3), (err, result) => {
             if(err) {
                 console.error(err)
             } else {
-                console.table(result);
+                console.log(this.showRole());
             }
         })
     }
@@ -73,7 +73,7 @@ class Employee extends Department{
         this.manager_id = manager_id;
     }
     showEmp(data){
-        db.query(`SELECT * FROM employee`, (err, result) => {
+        db.query(`SELECT first_name as First_Name, last_name as Last_Name, title as Job_Title, dep_name as Department, salary as Salary, manager_id as Manager FROM employee INNER JOIN emp_role ON emp_role.id = employee.role_id INNER JOIN department ON emp_role.department_id = department.id`, (err, result) => {
             if(err) {
                 console.error('500')
             } else {
@@ -89,6 +89,9 @@ class Employee extends Department{
                 console.table(result);
             }
         })
+    };
+    updateEmp(data){
+
     }
 }
 //pulls all departments

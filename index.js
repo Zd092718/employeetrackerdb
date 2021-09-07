@@ -17,9 +17,11 @@ inquirer.prompt(
     }
 ]
 )
+
 .then((choice) => {
   showDb(choice);
-  addDepartment(choice);  
+  addDepartment(choice); 
+  addRole(choice); 
 })
 
 };
@@ -29,18 +31,16 @@ function showDb(data){
     const showDbQuery = new Department()
     showDbQuery.showDep(data)
     console.log('  ')
-    init();
     } else if (data.mainmenu === 'view all roles'){
       const showDbQuery = new Role()
       showDbQuery.showRole(data);
-      init();
     } else if (data.mainmenu === 'view all employees'){
       const showDbQuery = new Employee()
       showDbQuery.showEmp(data);
-      init();
     } 
+    return;
 };
-
+//Adds department to db
 function addDepartment(data){
   if(data.mainmenu === 'add a department'){
     inquirer.prompt([
@@ -53,11 +53,11 @@ function addDepartment(data){
     .then((data) => {
       const addTo = new Department()
       addTo.addDep(data.dep_name)
-      console.log(addTo)
       init();
     })
   }
 }
+//Adds role to db
 function addRole(data){
   if(data.mainmenu === 'add a role'){
     inquirer.prompt([
@@ -79,10 +79,12 @@ function addRole(data){
     ])
     .then((data) => {
       const addTo = new Role()
-      addTo.addRole(data.role_name, data.salary, data.dep_name)
+      addTo.addRole(data.dep_name, data.role_name, data.salary)
+      console.log(addTo)
     })
   }
 }
+//Adds employee to db
 function addEmployee(data){
   if(data.mainmenu === 'add an employee'){
     inquirer.prompt([
