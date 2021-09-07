@@ -14,12 +14,11 @@ const db = mysql.createConnection(
         console.log(`Connected to the employees_db database.`)
       );
 class Department{
-    constructor(id, dep_name){
-        this.id = id;
+    constructor(dep_name){
         this.dep_name = dep_name;
     }
     showDep(data){
-        db.query(`SELECT * FROM department`, (err, result) => {
+        db.query(`SELECT dep_name as Department FROM department`, (err, result) => {
             if(err) {
                 console.error('500')
             } else {
@@ -27,12 +26,12 @@ class Department{
             }
     })
     };
-    async addDep(data){
-        await connection.execute(`INSERT INTO department VALUES (?)`, data.depName, (err, result) => {
+    addDep(data){
+        db.query(`INSERT INTO department VALUES (id, ?)`, data, (err, result) => {
             if(err) {
-                console.error('500')
+                console.error(err)
             } else {
-                console.table(result);
+                console.log(result);
             }
         })
     }
@@ -46,7 +45,7 @@ class Role extends Department{
         this.department_id = department_id;
     };
     showRole(data){
-        db.query(`SELECT * FROM emp_role`, (err, result) => {
+        db.query(`SELECT title as Title, salary as Salary, dep_name as Department FROM emp_role INNER JOIN department ON emp_role.department_id = department.id`, (err, result) => {
             if(err) {
                 console.error('500')
             } else {
@@ -54,6 +53,15 @@ class Role extends Department{
             }
     })
     };
+    addRole(data){
+        db.query(`INSERT INTO emp_role VALUES (?)`, (err, result) => {
+            if(err) {
+                console.error(err)
+            } else {
+                console.table(result);
+            }
+        })
+    }
 };
 
 class Employee extends Department{
@@ -72,6 +80,15 @@ class Employee extends Department{
                 console.table(result);
             }
     })
+    };
+    addEmp(data){
+        db.query(`INSERT INTO employee VALUES (?)`, (err, result) => {
+            if(err) {
+                console.error(err)
+            } else {
+                console.table(result);
+            }
+        })
     }
 }
 //pulls all departments
