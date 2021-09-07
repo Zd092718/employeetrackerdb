@@ -1,10 +1,10 @@
 const inquirer = require('inquirer');
-const { showdb, addtodb } = require('./linkdb.js');
+const { Department, Role, Employee } = require('./linkdb.js');
 
 
-
-
-const main = [
+function init(){
+inquirer.prompt(
+ [
     {
         type: 'list',
         name: 'mainmenu',
@@ -14,15 +14,29 @@ const main = [
           return val.toLowerCase();
         },
     }
-];
-
-
-
-function init(){
-inquirer.prompt(main)
-.then((data) => showdb(data))
+]
+)
+.then((data) => {
+  showDb(data);
+  
+})
 };
 
+function showDb(data){
+  if(data.mainmenu === 'view all departments'){
+    const showDbQuery = new Department()
+    showDbQuery.showDep(data)
+    console.log('  ')
+    init();
+    } else if (data.mainmenu === 'view all roles'){
+      const showDbQuery = new Role()
+      showDbQuery.showRole(data);
+      init();
+    } else if (data.mainmenu === 'view all employees'){
+      const showDbQuery = new Employee()
+      showDbQuery.showEmp(data);
+      init();
+    } 
+};
 init();
-
-module.exports = init;
+// if()
