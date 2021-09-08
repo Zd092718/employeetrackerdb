@@ -1,5 +1,6 @@
 const mysql = require('mysql2/promise');
 const inquirer = require('inquirer');
+const cTable = require('console.table');
 let db;
 
 (async function(){
@@ -61,15 +62,9 @@ class Employee extends Department{
         const [empResult] = await db.query(`SELECT first_name as First_Name, last_name as Last_Name, title as Job_Title, dep_name as Department, salary as Salary, manager_id as Manager FROM employee INNER JOIN emp_role ON emp_role.id = employee.role_id INNER JOIN department ON emp_role.department_id = department.id`)
         console.table(empResult);
     }
-    addEmp(data1, data2, data3, data4){
-        const values = [data1, data2, data3, data4]
-        db.query(`INSERT INTO employee VALUES (?)`, [values] ,(err, result) => {
-            if(err) {
-                console.error(err)
-            } else {
-                console.table(result);
-            }
-        })
+    async addEmp(first_name, last_name, role_id, manager_id){
+        const values = [first_name, last_name, role_id, manager_id]
+        await db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?)`, [values])
     };
     async updateEmp(newData){
         await db.query(`UPDATE employee SET role_id = replace(role_id, ?)`,newData)

@@ -20,7 +20,7 @@ inquirer.prompt(
         type: 'list',
         name: 'mainmenu',
         message: 'What would you like to do? (Use arrow keys to choose)',
-        choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role'],
+        choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Quit'],
         filter(val) {
           return val.toLowerCase();
         },
@@ -52,24 +52,27 @@ inquirer.prompt(
     case 'update an employee role':
       updateEmployee(res)
       break;
+    case 'quit':
+      quit(res);
+      break;
   }})}
 
 async function depTable(data){
     const showDbQuery =  new Department()
     showDbQuery.showDep(data)
-    console.log('/n')
+    console.log('\n')
     init();
 }
 async function roleTable(data){
     const showDbQuery = new Role()
     showDbQuery.showRole(data)
-    console.log('/n')
+    console.log('\n')
     init();
 }
 async function empTable(data){
     const showDbQuery = new Employee()
     showDbQuery.showEmp(data)
-    console.log('/n')
+    console.log('\n')
     init();
 }
 //Adds department to db
@@ -129,7 +132,6 @@ function addDepartment(data){
         // const id = data.dep_name.Department = data.dep_name.value
         addTo.addRole(res.title, res.salary, res.department.id)
         console.log(`Added ${res.title} to the database!`)
-        console.log(res.department.id)
         init();
       })
     }
@@ -145,8 +147,8 @@ async function addEmployee(data){
     },
     console.log(`Connected to the employees_db database.`)
   );
-  const [roleQuery] = await db.query(`SELECT title from emp_role`)
-  console.log(roleQuery)
+  const [roleQuery] = await db.query(`SELECT title, id from emp_role`)
+  const [userQuery] = await db.query(`SELECT first_name, last_name, id from employee`)
     inquirer.prompt([
       {
         type: 'input',
@@ -160,37 +162,54 @@ async function addEmployee(data){
       },
       {
         type: 'list',
-        name: 'role_name',
+        name: 'role_id',
         message: "What's this employee's role",
-        choices: roleQuery.map(employee => ({title:employee.Role, value: employee}))
+        choices: roleQuery.map(role => ({name:role.title, value: role.id}))
       },
       {
-        type: 'input',
-        name: 'manager_name',
+        type: 'list',
+        name: 'manager_id',
         message: "What's the name of this employee's manager",
+        choices: userQuery.map(employee => ({name:`${employee.first_name} ${employee.last_name}`, value: employee.id}))
       },
     ])
-    .then((data) => {
+    .then((res) => {
       const addTo = new Employee()
-      addTo.addEmp(data.first_name, data.last_name, data.role_name.Role, data.manager_name)
-      console.log(data)
+      addTo.addEmp(res.first_name, res.last_name, res.role_id, res.manager_id)
+      console.log(`Added ${res.first_name} to the database!`)
+      init();
     })
   }
 //Updates employee to db
-function updateEmployee(data){
-  if(data.mainmenu === 'update an employee role'){
+async function updateEmployee(data){
+  let db = await mysql.createConnection(
+    {
+      host: 'localhost',
+      // MySQL username,
+      user: 'root',
+      password: '',
+      database: 'employees_db'
+    },
+    console.log(`Connected to the employees_db database.`)
+  );
+  const [roleQuery] = await db.query(`SELECT title, id from emp_role`)
   inquirer.prompt([
     {
-      type: 'input',
-      name: 'role_name',
-      message: "What's the employee's new role",
+      type: 'list',
+      name: 'role_id',
+      message: "What's this employee's new role",
+      choices: roleQuery.map(role => ({name:role.title, value: role.id}))
     },
   ])
   .then((data) => {
     const addTo = new Role()
-    addTo.addRole(data.dep_name, data.role_name, data.salary)
-    console.log(addTo)
+    addTo.addRole(data.dep_name, data.role_id, data.salary)
+    console.log(data.role_id)
   })
 }
+
+function quit(res){
+  console.log('Bye!')
+  process.exit(0);
 }
 init();
