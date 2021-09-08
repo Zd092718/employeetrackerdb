@@ -1,5 +1,15 @@
 const inquirer = require('inquirer');
-const { Department, Role, Employee } = require('./linkdb.js');
+const mysql = require('mysql2/promise');
+const { Department, Role, Employee} = require('./linkdb.js');
+
+
+let db;
+
+
+
+ 
+
+
 
 console.log('Welcome to the Employee Tracker Database!');
 function init(){
@@ -18,28 +28,67 @@ inquirer.prompt(
 ]
 )
 
-.then((choice) => {
-  showDb(choice);
-  addDepartment(choice); 
-  addRole(choice); 
-})
+.then(res => {
+  const choice = res.mainmenu;
+  switch(choice){
+    case 'view all departments':
+      depTable(res)
+      break;
+    case 'view all roles':
+      roleTable(res)
+      break;
+    case 'view all employees':
+      empTable()
+      break;
+    case 'add a department':
+      addDepartment(res)
+      break;
+    case 'add a role':
+      addRole(res)
+      break;
+    case 'add an employee':
+      addEmployee(res)
+      break;
+    case 'update an employee role':
+      updateEmployee(res)
+      break;
+  }})}
+// .then((choice) => {  
+//   console.log(choice)
+//   showDb(choice);
+//   addDepartment(choice); 
+//   addRole(choice); 
+//   addEmployee(choice);
+//   updateEmployee(choice);})
 
-};
+// }
 
-function showDb(data){
-  if(data.mainmenu === 'view all departments'){
-    const showDbQuery = new Department()
-    showDbQuery.showDep(data)
-    console.log('  ')
-    } else if (data.mainmenu === 'view all roles'){
-      const showDbQuery = new Role()
-      showDbQuery.showRole(data);
-    } else if (data.mainmenu === 'view all employees'){
-      const showDbQuery = new Employee()
-      showDbQuery.showEmp(data);
-    } 
-    return;
-};
+
+// const showDb = (data) =>{
+//   if(data.mainmenu === 'view all departments'){
+//     const showDbQuery = new Department()
+//     showDbQuery.showDep(data)
+//     } else if (data.mainmenu === 'view all roles'){
+//       const showDbQuery = new Role()
+//       showDbQuery.showRole(data);
+//     } else if (data.mainmenu === 'view all employees'){
+//       const showDbQuery = new Employee()
+//       showDbQuery.showEmp(data);
+//     } 
+// };
+
+ async function depTable(data){
+    const showDbQuery =  new Department()
+     showDbQuery.showDep(data)
+}
+const roleTable = (data) => {
+    const showDbQuery = new Role()
+    showDbQuery.showRole(data)
+}
+const empTable = (data) => {
+    const showDbQuery = new Employee()
+    showDbQuery.showEmp(data)
+}
 //Adds department to db
 function addDepartment(data){
   if(data.mainmenu === 'add a department'){
@@ -53,37 +102,60 @@ function addDepartment(data){
     .then((data) => {
       const addTo = new Department()
       addTo.addDep(data.dep_name)
+      console.log(`Added ${data.dep_name} to the database!`);
       init();
     })
   }
 }
-//Adds role to db
-function addRole(data){
-  if(data.mainmenu === 'add a role'){
-    inquirer.prompt([
+
+
+  async function addRole(data){ 
+  let db = await mysql.createConnection(
       {
-        type: 'input',
-        name: 'role_name',
-        message: "What's the name of the role",
+        host: 'localhost',
+        // MySQL username,
+        user: 'root',
+        password: '',
+        database: 'employees_db'
       },
-      {
-        type: 'input',
-        name: 'salary',
-        message: "What's the salary for the role",
-      },
-      {
-        type: 'input',
-        name: 'dep_name',
-        message: "What's the department for the role",
-      },
-    ])
-    .then((data) => {
-      const addTo = new Role()
-      addTo.addRole(data.dep_name, data.role_name, data.salary)
-      console.log(addTo)
-    })
-  }
-}
+      console.log(`Connected to the employees_db database.`)
+    );
+
+    const [depQuery] = await db.query(`SELECT dep_name as Department FROM department`)
+    // , (err, result) => {
+    //   if(err) {
+    //       console.error('500')
+    //   } else {
+    //     return result
+    //   }
+    // });
+    console.log(depQuery.map(employee => employee.Department))
+      inquirer.prompt([
+        {
+          type: 'input',
+          name: 'title',
+          message: "What's the name of the role",
+        },
+        {
+          type: 'input',
+          name: 'salary',
+          message: "What's the salary for the role",
+        },
+        {
+          type: 'list',
+          name: 'dep_name',
+          message: "What's the department for the role",
+          choices: depQuery.map(employee => ({name:employee.Department, value: employee}))
+        },
+      ])
+      .then((data) => {
+        const addTo = new Role()
+        addTo.addRole(data.title, data.salary, data.dep_name)
+        console.log(`Added ${data.title} to the database!`)
+        console.log(addTo)
+        init();
+      })
+    }
 //Adds employee to db
 function addEmployee(data){
   if(data.mainmenu === 'add an employee'){
@@ -111,8 +183,26 @@ function addEmployee(data){
     ])
     .then((data) => {
       const addTo = new Employee()
-      addTo.addEmp(data)
+      addTo.addEmp(data.first_name, data.last_name, data.role_name, data.manager_name)
+      console.log(addTo)
     })
   }
+}
+//Updates employee to db
+function updateEmployee(data){
+  if(data.mainmenu === 'update an employee role'){
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'role_name',
+      message: "What's the employee's new role",
+    },
+  ])
+  .then((data) => {
+    const addTo = new Role()
+    addTo.addRole(data.dep_name, data.role_name, data.salary)
+    console.log(addTo)
+  })
+}
 }
 init();

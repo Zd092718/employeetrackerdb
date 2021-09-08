@@ -1,41 +1,45 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const inquirer = require('inquirer');
-const init = require('./index.js');
+let db;
 
-const db = mysql.createConnection(
-        {
-          host: 'localhost',
-          // MySQL username,
-          user: 'root',
-          // TODO: Add MySQL password here
-          password: '',
-          database: 'employees_db'
-        },
-        console.log(`Connected to the employees_db database.`)
-      );
+(async function(){
+
+
+    db = await mysql.createConnection(
+            {
+              host: 'localhost',
+              // MySQL username,
+              user: 'root',
+              password: '',
+              database: 'employees_db'
+            },
+            console.log(`Connected to the employees_db database.`)
+          );
+})()
+    
 class Department{
-    constructor(dep_name){
+    constructor(id, dep_name){
+        this.id = id;
         this.dep_name = dep_name;
     }
-    showDep(data){
-        db.query(`SELECT dep_name as Department FROM department`, (err, result) => {
+  async showDep(data){
+        await db.query(`SELECT dep_name as Department FROM department`, (err, result) => {
             if(err) {
                 console.error('500')
             } else {
                 console.table(result);
             }
-    })
+        })
     };
     addDep(data){
         db.query(`INSERT INTO department VALUES (id, ?)`, data, (err, result) => {
             if(err) {
                 console.error(err)
-            } else {
-                console.log(this.showDep());
-            }
-        })
+        }
+    })
     }
 }
+
 
 class Role extends Department{
     constructor(title, salary, dep_name){
@@ -54,15 +58,51 @@ class Role extends Department{
     })
     };
     addRole(data1, data2, data3){
-        db.query(`INSERT INTO emp_role ?`, (data1, data2, data3), (err, result) => {
+        const datavalues = [data1, data2, data3]
+        db.query(`INSERT INTO emp_role VALUES (id, ?)`, [datavalues], (err, result) => {
             if(err) {
                 console.error(err)
-            } else {
-                console.log(this.showRole());
             }
         })
     }
 };
+
+function addRole(data){ 
+  const [depQuery] = db.query(`SELECT dep_name as Department FROM department`)
+  // , (err, result) => {
+  //   if(err) {
+  //       console.error('500')
+  //   } else {
+  //     return result
+  //   }
+  // });
+  console.log(depQuery)
+    inquirer.prompt([
+      {
+        type: 'input',
+        name: 'title',
+        message: "What's the name of the role",
+      },
+      {
+        type: 'input',
+        name: 'salary',
+        message: "What's the salary for the role",
+      },
+      // {
+      //   type: 'list',
+      //   name: 'dep_name',
+      //   message: "What's the department for the role",
+      //   choices: 
+      // },
+    ])
+    .then((data) => {
+      const addTo = new Role()
+      addTo.addRole(data.title, data.salary, data.dep_name)
+      console.log(`Added ${data.title} to the database!`)
+      console.log(addTo)
+      init();
+    })
+  }
 
 class Employee extends Department{
     constructor(id, first_name, last_name, role_id, manager_id){
@@ -81,8 +121,9 @@ class Employee extends Department{
             }
     })
     };
-    addEmp(data){
-        db.query(`INSERT INTO employee VALUES (?)`, (err, result) => {
+    addEmp(data1, data2, data3, data4){
+        const values = [data1, data2, data3, data4]
+        db.query(`INSERT INTO employee VALUES (?)`, values ,(err, result) => {
             if(err) {
                 console.error(err)
             } else {
@@ -90,8 +131,14 @@ class Employee extends Department{
             }
         })
     };
-    updateEmp(data){
-
+    updateEmp(oldData, newData){
+        db.query(`UPDATE employee SET role_id = replace(role_id, ?)`,(oldData, newData), (err, result) => {
+            if(err) {
+                console.error(err)
+            } else {
+                console.table(result);
+            }
+        })
     }
 }
 //pulls all departments
@@ -130,4 +177,4 @@ class Employee extends Department{
 // );
 // }
 
-module.exports = { Department, Role, Employee };
+module.exports = { Department, Role, Employee, db };
