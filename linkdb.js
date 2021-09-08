@@ -46,47 +46,9 @@ class Role extends Department{
     }
     async addRole(data1, data2, data3){
         const datavalues = [data1, data2, data3]
-        await db.query(`INSERT INTO emp_role VALUES (id, ?)`, [datavalues])
+        await db.query(`INSERT INTO emp_role (title, salary, department_id) VALUES (?)`, [datavalues])
     }
 };
-
-function addRole(data){ 
-  const [depQuery] = db.query(`SELECT dep_name as Department FROM department`)
-  // , (err, result) => {
-  //   if(err) {
-  //       console.error('500')
-  //   } else {
-  //     return result
-  //   }
-  // });
-  console.log(depQuery)
-    inquirer.prompt([
-      {
-        type: 'input',
-        name: 'title',
-        message: "What's the name of the role",
-      },
-      {
-        type: 'input',
-        name: 'salary',
-        message: "What's the salary for the role",
-      },
-      // {
-      //   type: 'list',
-      //   name: 'dep_name',
-      //   message: "What's the department for the role",
-      //   choices: 
-      // },
-    ])
-    .then((data) => {
-      const addTo = new Role()
-      addTo.addRole(data.title, data.salary, data.dep_name)
-      console.log(`Added ${data.title} to the database!`)
-      console.log(addTo)
-      init();
-    })
-  }
-
 class Employee extends Department{
     constructor(id, first_name, last_name, role_id, manager_id){
         super(id)
@@ -95,18 +57,13 @@ class Employee extends Department{
         this.role_id = role_id;
         this.manager_id = manager_id;
     }
-    showEmp(data){
-        db.query(`SELECT first_name as First_Name, last_name as Last_Name, title as Job_Title, dep_name as Department, salary as Salary, manager_id as Manager FROM employee INNER JOIN emp_role ON emp_role.id = employee.role_id INNER JOIN department ON emp_role.department_id = department.id`, (err, result) => {
-            if(err) {
-                console.error('500')
-            } else {
-                console.table(result);
-            }
-    })
-    };
+    async showEmp(data){
+        const [empResult] = await db.query(`SELECT first_name as First_Name, last_name as Last_Name, title as Job_Title, dep_name as Department, salary as Salary, manager_id as Manager FROM employee INNER JOIN emp_role ON emp_role.id = employee.role_id INNER JOIN department ON emp_role.department_id = department.id`)
+        console.table(empResult);
+    }
     addEmp(data1, data2, data3, data4){
         const values = [data1, data2, data3, data4]
-        db.query(`INSERT INTO employee VALUES (?)`, values ,(err, result) => {
+        db.query(`INSERT INTO employee VALUES (?)`, [values] ,(err, result) => {
             if(err) {
                 console.error(err)
             } else {

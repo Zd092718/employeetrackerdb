@@ -53,39 +53,17 @@ inquirer.prompt(
       updateEmployee(res)
       break;
   }})}
-// .then((choice) => {  
-//   console.log(choice)
-//   showDb(choice);
-//   addDepartment(choice); 
-//   addRole(choice); 
-//   addEmployee(choice);
-//   updateEmployee(choice);})
 
-// }
-
-
-// const showDb = (data) =>{
-//   if(data.mainmenu === 'view all departments'){
-//     const showDbQuery = new Department()
-//     showDbQuery.showDep(data)
-//     } else if (data.mainmenu === 'view all roles'){
-//       const showDbQuery = new Role()
-//       showDbQuery.showRole(data);
-//     } else if (data.mainmenu === 'view all employees'){
-//       const showDbQuery = new Employee()
-//       showDbQuery.showEmp(data);
-//     } 
-// };
-
- async function depTable(data){
+async function depTable(data){
     const showDbQuery =  new Department()
     showDbQuery.showDep(data)
+    init()
 }
-const roleTable = (data) => {
+async function roleTable(data){
     const showDbQuery = new Role()
     showDbQuery.showRole(data)
 }
-const empTable = (data) => {
+async function empTable(data){
     const showDbQuery = new Employee()
     showDbQuery.showEmp(data)
 }
@@ -141,15 +119,27 @@ function addDepartment(data){
       ])
       .then((data) => {
         const addTo = new Role()
-        addTo.addRole(data.title, data.salary, data.dep_name)
+        console.log(addTo)
+        addTo.addRole(data.title, data.salary, data.dep_name.value)
         console.log(`Added ${data.title} to the database!`)
         console.log(addTo)
         init();
       })
     }
 //Adds employee to db
-function addEmployee(data){
-  if(data.mainmenu === 'add an employee'){
+async function addEmployee(data){
+  let db = await mysql.createConnection(
+    {
+      host: 'localhost',
+      // MySQL username,
+      user: 'root',
+      password: '',
+      database: 'employees_db'
+    },
+    console.log(`Connected to the employees_db database.`)
+  );
+  const [roleQuery] = await db.query(`SELECT title from emp_role`)
+  console.log(roleQuery)
     inquirer.prompt([
       {
         type: 'input',
@@ -162,9 +152,10 @@ function addEmployee(data){
         message: "What's the last name of the employee",
       },
       {
-        type: 'input',
+        type: 'list',
         name: 'role_name',
-        message: "What's the employee's role",
+        message: "What's this employee's role",
+        choices: roleQuery.map(employee => ({title:employee.Role, value: employee}))
       },
       {
         type: 'input',
@@ -178,7 +169,6 @@ function addEmployee(data){
       console.log(addTo)
     })
   }
-}
 //Updates employee to db
 function updateEmployee(data){
   if(data.mainmenu === 'update an employee role'){
