@@ -211,12 +211,12 @@ async function updateEmployee(data){
   .then((data) => {
     const addTo = new Employee()
     addTo.updateEmp(data.role_id)
-    console.log(`Updated ${data.employee_id.name} in the database!`)
+    console.log(`Updated in the database!`)
     console.log(data.role_id)
     init();
   })
 }
-
+//Quits Program
 function quit(res){
   console.log('Bye!')
   process.exit(0);
