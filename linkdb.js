@@ -23,13 +23,9 @@ class Department{
         this.dep_name = dep_name;
     }
   async showDep(data){
-        await db.query(`SELECT dep_name as Department FROM department`, (err, result) => {
-            if(err) {
-                console.error('500')
-            } else {
-                console.table(result);
-            }
-        })
+        const [departmentResult] = await db.query(`SELECT dep_name as Department FROM department`)
+
+                console.table(departmentResult);
     };
     addDep(data){
         db.query(`INSERT INTO department VALUES (id, ?)`, data, (err, result) => {
