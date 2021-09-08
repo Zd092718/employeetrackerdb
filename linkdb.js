@@ -23,18 +23,14 @@ class Department{
         this.dep_name = dep_name;
     }
   async showDep(data){
-        const [departmentResult] = await db.query(`SELECT dep_name as Department FROM department`)
-
-                console.table(departmentResult);
+        const [departmentResult] = await db.query(`SELECT dep_name as Department FROM department`);
+        console.table(departmentResult);
     };
-    addDep(data){
-        db.query(`INSERT INTO department VALUES (id, ?)`, data, (err, result) => {
-            if(err) {
-                console.error(err)
-        }
-    })
+    async addDep(data){
+       await db.query(`INSERT INTO department VALUES (id, ?)`, data);
     }
-}
+    }
+
 
 
 class Role extends Department{
@@ -44,22 +40,13 @@ class Role extends Department{
         this.salary = salary;
         // this.dep_name = this.dep_name;
     };
-    showRole(data){
-        db.query(`SELECT title as Title, salary as Salary, dep_name as Department FROM emp_role INNER JOIN department ON emp_role.department_id = department.id`, (err, result) => {
-            if(err) {
-                console.error('500')
-            } else {
-                console.table(result);
-            }
-    })
-    };
-    addRole(data1, data2, data3){
+    async showRole(data){
+        const [roleResult] = await db.query(`SELECT title as Title, salary as Salary, dep_name as Department FROM emp_role INNER JOIN department ON emp_role.department_id = department.id`);
+        console.table(roleResult);
+    }
+    async addRole(data1, data2, data3){
         const datavalues = [data1, data2, data3]
-        db.query(`INSERT INTO emp_role VALUES (id, ?)`, [datavalues], (err, result) => {
-            if(err) {
-                console.error(err)
-            }
-        })
+        await db.query(`INSERT INTO emp_role VALUES (id, ?)`, [datavalues])
     }
 };
 

@@ -79,7 +79,7 @@ inquirer.prompt(
 
  async function depTable(data){
     const showDbQuery =  new Department()
-     showDbQuery.showDep(data)
+    showDbQuery.showDep(data)
 }
 const roleTable = (data) => {
     const showDbQuery = new Role()
@@ -91,7 +91,6 @@ const empTable = (data) => {
 }
 //Adds department to db
 function addDepartment(data){
-  if(data.mainmenu === 'add a department'){
     inquirer.prompt([
       {
         type: 'input',
@@ -106,7 +105,7 @@ function addDepartment(data){
       init();
     })
   }
-}
+
 
 
   async function addRole(data){ 
@@ -122,14 +121,6 @@ function addDepartment(data){
     );
 
     const [depQuery] = await db.query(`SELECT dep_name as Department FROM department`)
-    // , (err, result) => {
-    //   if(err) {
-    //       console.error('500')
-    //   } else {
-    //     return result
-    //   }
-    // });
-    console.log(depQuery.map(employee => employee.Department))
       inquirer.prompt([
         {
           type: 'input',
