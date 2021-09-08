@@ -193,7 +193,14 @@ async function updateEmployee(data){
     console.log(`Connected to the employees_db database.`)
   );
   const [roleQuery] = await db.query(`SELECT title, id from emp_role`)
+  const [userQuery] = await db.query(`SELECT first_name, last_name, id from employee`)
   inquirer.prompt([
+    {
+      type: 'list',
+      name: 'employee_id',
+      message: "What's the name of the employee",
+      choices: userQuery.map(employee => ({name:`${employee.first_name} ${employee.last_name}`, value: employee.id}))
+    },
     {
       type: 'list',
       name: 'role_id',
@@ -202,9 +209,11 @@ async function updateEmployee(data){
     },
   ])
   .then((data) => {
-    const addTo = new Role()
-    addTo.addRole(data.dep_name, data.role_id, data.salary)
+    const addTo = new Employee()
+    addTo.updateEmp(data.role_id)
+    console.log(`Updated ${data.employee_id.name} in the database!`)
     console.log(data.role_id)
+    init();
   })
 }
 

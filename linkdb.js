@@ -67,7 +67,7 @@ class Employee extends Department{
         await db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?)`, [values])
     };
     async updateEmp(newData){
-        await db.query(`UPDATE employee SET role_id = replace(role_id, ?)`,newData)
+        await db.query(`UPDATE employee SET role_id =?`, newData)
     }
 }
 //pulls all departments
