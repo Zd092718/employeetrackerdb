@@ -57,15 +57,20 @@ inquirer.prompt(
 async function depTable(data){
     const showDbQuery =  new Department()
     showDbQuery.showDep(data)
-    init()
+    console.log('/n')
+    init();
 }
 async function roleTable(data){
     const showDbQuery = new Role()
     showDbQuery.showRole(data)
+    console.log('/n')
+    init();
 }
 async function empTable(data){
     const showDbQuery = new Employee()
     showDbQuery.showEmp(data)
+    console.log('/n')
+    init();
 }
 //Adds department to db
 function addDepartment(data){
@@ -98,7 +103,9 @@ function addDepartment(data){
       console.log(`Connected to the employees_db database.`)
     );
 
-    const [depQuery] = await db.query(`SELECT dep_name as Department FROM department`)
+    const [depQuery] = await db.query(`SELECT dep_name as Department, id  FROM department`)
+    // const [idQuery] = await db.query(`SELECT department_id from emp_role INNER JOIN department ON emp_role.department_id = department.id`)
+
       inquirer.prompt([
         {
           type: 'input',
@@ -112,17 +119,17 @@ function addDepartment(data){
         },
         {
           type: 'list',
-          name: 'dep_name',
+          name: 'department',
           message: "What's the department for the role",
-          choices: depQuery.map(employee => ({name:employee.Department, value: employee}))
+          choices: depQuery.map(department => ({name:department.Department, value: department}))
         },
       ])
-      .then((data) => {
+      .then((res) => {
         const addTo = new Role()
-        console.log(addTo)
-        addTo.addRole(data.title, data.salary, data.dep_name.value)
-        console.log(`Added ${data.title} to the database!`)
-        console.log(addTo)
+        // const id = data.dep_name.Department = data.dep_name.value
+        addTo.addRole(res.title, res.salary, res.department.id)
+        console.log(`Added ${res.title} to the database!`)
+        console.log(res.department.id)
         init();
       })
     }
@@ -165,8 +172,8 @@ async function addEmployee(data){
     ])
     .then((data) => {
       const addTo = new Employee()
-      addTo.addEmp(data.first_name, data.last_name, data.role_name, data.manager_name)
-      console.log(addTo)
+      addTo.addEmp(data.first_name, data.last_name, data.role_name.Role, data.manager_name)
+      console.log(data)
     })
   }
 //Updates employee to db

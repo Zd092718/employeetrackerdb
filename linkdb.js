@@ -44,8 +44,8 @@ class Role extends Department{
         const [roleResult] = await db.query(`SELECT title as Title, salary as Salary, dep_name as Department FROM emp_role INNER JOIN department ON emp_role.department_id = department.id`);
         console.table(roleResult);
     }
-    async addRole(data1, data2, data3){
-        const datavalues = [data1, data2, data3]
+    async addRole(title, salary, department_id){
+        const datavalues = [title, salary, department_id]
         await db.query(`INSERT INTO emp_role (title, salary, department_id) VALUES (?)`, [datavalues])
     }
 };
@@ -71,14 +71,8 @@ class Employee extends Department{
             }
         })
     };
-    updateEmp(oldData, newData){
-        db.query(`UPDATE employee SET role_id = replace(role_id, ?)`,(oldData, newData), (err, result) => {
-            if(err) {
-                console.error(err)
-            } else {
-                console.table(result);
-            }
-        })
+    async updateEmp(newData){
+        await db.query(`UPDATE employee SET role_id = replace(role_id, ?)`,newData)
     }
 }
 //pulls all departments
